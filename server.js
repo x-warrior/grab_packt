@@ -1,4 +1,5 @@
-require('dotenv').load({
+var dotenv = require('dotenv')
+dotenv.load({
     path: __dirname + '/.env'
 });
 
@@ -18,6 +19,11 @@ var url = 'https://www.packtpub.com/packt/offers/free-learning';
 var loginError = 'Sorry, you entered an invalid email address and password combination.';
 var getBookUrl;
 var bookTitle;
+
+DEST_FOLDER = process.env.DEST_FOLDER
+if (!DEST_FOLDER) {
+    DEST_FOLDER = __dirname + '/downloads'
+}
 
 //we need cookies for that, therefore let's turn JAR on
 request = request.defaults({
@@ -41,7 +47,7 @@ function downloadBookVersions(bookTitle, getBookUrl) {
     epubUrl = downloadUrl + '/epub';
     mobiUrl = downloadUrl + '/mobi';
 
-    destFolder = 'downloads/' + bookTitle;
+    destFolder = DEST_FOLDER + '/' + bookTitle;
     mkdirp(destFolder, function(err) {
         if (err) {
             console.log('----------- Packt Grab Done --------------');
