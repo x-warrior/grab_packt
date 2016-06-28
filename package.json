@@ -8,6 +8,8 @@
   "dependencies": {
     "cheerio": "latest",
     "dotenv": "^1.1.0",
-    "request": "latest"
+    "mkdirp": "^0.5.1",
+    "request": "latest",
+    "slugify": "^0.1.1"
   }
 }
