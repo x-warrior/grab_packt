@@ -6,6 +6,7 @@ dotenv.load({
 var request = require('request');
 var cheerio = require('cheerio');
 var mkdirp = require('mkdirp');
+var async = require("async");
 var loginDetails = {
     email: process.env.PACKT_EMAIL,
     password: process.env.PACKT_PASSWORD,
@@ -34,14 +35,17 @@ function download(url, path, callback) {
   request({uri: url})
       .pipe(fs.createWriteStream(path))
       .on('close', function() {
-        callback();
+        console.log("Finished downloading: " + url)
+        callback(null, url);
       });
 }
 
 function downloadIfDoesntExist(url, path, callback) {
+    console.log("Downloading: " + url);
     fs.access(path, fs.F_OK, function(err) {
         if (!err) {
             console.log(path + ' file exists. Skipping.');
+            callback(null, url);
         } else {
             download(url, path, callback);
         }
@@ -64,14 +68,27 @@ function downloadBookVersions(bookTitle, getBookUrl) {
             return;
         }
 
-        console.log('Downloading PDF URL: ' + downloadUrl + '/pdf');
-        console.log('Downloading EPUB URL: ' + downloadUrl + '/epub');
-        console.log('Downloading MOBI URL: ' + downloadUrl + '/mobi');
-
-        downloadIfDoesntExist(pdfUrl, destFolder + '/' + bookTitle + '.pdf', function () { console.log("Finished downloading PDF"); });
-        downloadIfDoesntExist(epubUrl, destFolder + '/' + bookTitle + '.epub', function () { console.log("Finished downloading EPUB"); });
-        downloadIfDoesntExist(mobiUrl, destFolder + '/' + bookTitle + '.mobi', function () { console.log("Finished downloading MOBI"); });
-
+        async.parallel([
+                function (cb) { 
+                    downloadIfDoesntExist(pdfUrl, 
+                        destFolder + '/' + bookTitle + '.pdf', 
+                        cb
+                    );
+                },
+                function (cb) { 
+                    downloadIfDoesntExist(epubUrl, 
+                        destFolder + '/' + bookTitle + '.epub', 
+                        cb
+                    );
+                },
+                function (cb) { 
+                    downloadIfDoesntExist(mobiUrl, 
+                        destFolder + '/' + bookTitle + '.mobi', 
+                        cb
+                    );
+                }
+            ], function (err, results) { console.log('----------- Packt Grab Done --------------'); });
+        
     });
 }
 
