@@ -38,6 +38,16 @@ function download(url, path, callback) {
       });
 }
 
+function downloadIfDoesntExist(url, path, callback) {
+    fs.access(path, fs.F_OK, function(err) {
+        if (!err) {
+            console.log(path + ' file exists. Skipping.');
+        } else {
+            download(url, path, callback);
+        }
+    });
+}
+
 function downloadBookVersions(bookTitle, getBookUrl) {
     bookTitle = slugify(bookTitle).toLowerCase();
     match = getBookUrl.match(/\/(.*)\/(.*)\/(.*)/);
@@ -58,9 +68,9 @@ function downloadBookVersions(bookTitle, getBookUrl) {
         console.log('Downloading EPUB URL: ' + downloadUrl + '/epub');
         console.log('Downloading MOBI URL: ' + downloadUrl + '/mobi');
 
-        download(pdfUrl, destFolder + '/' + bookTitle + '.pdf', function () { console.log("Finished downloading PDF"); })
-        download(epubUrl, destFolder + '/' + bookTitle + '.epub', function () { console.log("Finished downloading EPUB"); })
-        download(mobiUrl, destFolder + '/' + bookTitle + '.mobi', function () { console.log("Finished downloading MOBI"); })
+        downloadIfDoesntExist(pdfUrl, destFolder + '/' + bookTitle + '.pdf', function () { console.log("Finished downloading PDF"); });
+        downloadIfDoesntExist(epubUrl, destFolder + '/' + bookTitle + '.epub', function () { console.log("Finished downloading EPUB"); });
+        downloadIfDoesntExist(mobiUrl, destFolder + '/' + bookTitle + '.mobi', function () { console.log("Finished downloading MOBI"); });
 
     });
 }
